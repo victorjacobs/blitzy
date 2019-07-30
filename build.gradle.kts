@@ -6,6 +6,7 @@ val jacksonVersion = "2.9.9"
 val cliktVersion = "2.0.0"
 val javaWebsocketVersion = "1.4.0"
 val elkiVersion = "0.7.5"
+val ktorVersion = "1.2.2"
 
 plugins {
     application
@@ -36,6 +37,8 @@ dependencies {
     implementation("com.github.ajalt:clikt:$cliktVersion")
     implementation("org.java-websocket:Java-WebSocket:$javaWebsocketVersion")
     implementation("de.lmu.ifi.dbs.elki:elki:$elkiVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
 }
 
 tasks.withType<KotlinCompile> {

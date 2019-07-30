@@ -21,8 +21,8 @@ fun cluster(data: Array<DoubleArray>): List<Cluster> {
 
     val clusteringResult = DBSCAN(
         LatLngDistanceFunction(SphericalHaversineEarthModel.STATIC),
-        5000.0,
-        10
+        10000.0,
+        15
     ).run(db)
 
     log.info("Clustering took {}ms", System.currentTimeMillis() - clusteringStartTimestamp)

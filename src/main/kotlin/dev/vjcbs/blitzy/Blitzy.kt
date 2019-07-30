@@ -1,18 +1,29 @@
 package dev.vjcbs.blitzy
 
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.Compression
+import io.ktor.features.ContentNegotiation
+import io.ktor.jackson.jackson
+import io.ktor.response.respond
+import io.ktor.routing.get
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-private const val clusteringInterval = 60 * 1000
-
 class Blitzy {
+
+    private val clusteringInterval = 60 * 1000
 
     private val log = logger()
 
     private val lightningStrikeStorage = LightningStrikeStorage()
 
-    private val client = BlitzOrtungClient(
+    private val blitzOrtungClient = BlitzOrtungClient(
         Coordinate(56.0, 10.0),
         Coordinate(43.1, 30.0)
         // Square around Berlin
@@ -22,17 +33,39 @@ class Blitzy {
         lightningStrikeStorage.add(it)
     }
 
+    private var clusters: List<Cluster> = listOf()
+
+    private var geoJson: FeatureCollection? = null
+
     fun run() = runBlocking {
         launch {
-            client.startAndKeepAlive()
+            blitzOrtungClient.startAndKeepAlive()
         }
+
+        embeddedServer(Netty, 8080) {
+            install(Compression)
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(KotlinModule())
+                }
+            }
+
+            routing {
+                get("/blitzortung.geojson") {
+                    geoJson?.let {
+                        call.respond(it)
+                    }
+                }
+            }
+        }.start()
 
         while (true) {
             delay(clusteringInterval.toLong())
 
             lightningStrikeStorage.prune()
 
-            val clusters = cluster(lightningStrikeStorage.asArray())
+            clusters = cluster(lightningStrikeStorage.asArray())
+            geoJson = FeatureCollection.fromClusters(clusters)
 
             log.info(
                 "Total number of clusters: {}, largest one: {}",

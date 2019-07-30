@@ -7,11 +7,17 @@ import de.lmu.ifi.dbs.elki.database.StaticArrayDatabase
 import de.lmu.ifi.dbs.elki.datasource.ArrayAdapterDatabaseConnection
 import de.lmu.ifi.dbs.elki.distance.distancefunction.geo.LatLngDistanceFunction
 import de.lmu.ifi.dbs.elki.math.geodesy.SphericalHaversineEarthModel
+import org.slf4j.LoggerFactory
 
 fun cluster(data: Array<DoubleArray>): List<Cluster> {
+    val log = LoggerFactory.getLogger(::cluster.javaClass)
+
     val dbc = ArrayAdapterDatabaseConnection(data)
     val db = StaticArrayDatabase(dbc, null)
     db.initialize()
+    val relation = db.getRelation<DoubleVector>(TypeUtil.DOUBLE_VECTOR_FIELD)
+
+    val clusteringStartTimestamp = System.currentTimeMillis()
 
     val clusteringResult = DBSCAN(
         LatLngDistanceFunction(SphericalHaversineEarthModel.STATIC),
@@ -19,7 +25,7 @@ fun cluster(data: Array<DoubleArray>): List<Cluster> {
         10
     ).run(db)
 
-    val relation = db.getRelation<DoubleVector>(TypeUtil.DOUBLE_VECTOR_FIELD)
+    log.info("Clustering took {}ms", System.currentTimeMillis() - clusteringStartTimestamp)
 
     return clusteringResult.allClusters.filter {
         !it.isNoise

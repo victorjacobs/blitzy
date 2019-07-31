@@ -30,7 +30,7 @@ class Main {
 
     private var clusters: List<Cluster> = listOf()
 
-    private var geoJson: FeatureCollection? = null
+    private var geoJson: FeatureCollection = FeatureCollection.fromClusters(listOf())
 
     fun run() = runBlocking {
         launch {
@@ -47,9 +47,7 @@ class Main {
 
             routing {
                 get("/blitzortung.geojson") {
-                    geoJson?.let {
-                        call.respond(it)
-                    }
+                    call.respond(it)
                 }
             }
         }.start()

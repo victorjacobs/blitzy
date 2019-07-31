@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class Blitzy {
+class Main {
 
     private val log = logger()
 
@@ -70,4 +70,4 @@ class Blitzy {
     }
 }
 
-fun main() = Blitzy().run()
+fun main() = Main().run()

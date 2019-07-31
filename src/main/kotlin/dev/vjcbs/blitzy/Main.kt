@@ -47,7 +47,7 @@ class Main {
 
             routing {
                 get("/blitzortung.geojson") {
-                    call.respond(it)
+                    call.respond(geoJson)
                 }
             }
         }.start()

@@ -59,8 +59,12 @@ class Main {
 
             lightningStrikeStorage.prune()
 
-            clusters = cluster(lightningStrikeStorage.asArray())
-            geoJson = FeatureCollection.fromClusters(clusters)
+            try {
+                clusters = cluster(lightningStrikeStorage.asArray())
+                geoJson = FeatureCollection.fromClusters(clusters)
+            } catch (e: Exception) {
+                log.error("Clustering failed", e)
+            }
 
             log.info(
                 "Total number of clusters: {}, largest one: {}",

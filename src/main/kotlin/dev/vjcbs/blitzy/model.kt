@@ -10,6 +10,12 @@ data class Coordinate(
             array[0],
             array[1]
         )
+
+        fun fromString(string: String) = Coordinate.fromArray(
+            string.split(",").map {
+                it.trim().toDouble()
+            }.toDoubleArray()
+        )
     }
 
     operator fun plus(other: Coordinate) = Coordinate(

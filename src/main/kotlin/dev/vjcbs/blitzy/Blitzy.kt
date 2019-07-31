@@ -17,18 +17,13 @@ import kotlinx.coroutines.runBlocking
 
 class Blitzy {
 
-    private val clusteringInterval = 60 * 1000
-
     private val log = logger()
 
-    private val lightningStrikeStorage = LightningStrikeStorage()
+    private val lightningStrikeStorage = LightningStrikeStorage(Configuration.lightningStrikeTtl)
 
     private val blitzOrtungClient = BlitzOrtungClient(
-        Coordinate(56.0, 10.0),
-        Coordinate(43.1, 30.0)
-        // Square around Berlin
-//        Coordinate(53.1, 12.4),
-//        Coordinate(51.8, 14.3)
+        Configuration.topLeftCoordinate,
+        Configuration.bottomRightCoordinate
     ) {
         lightningStrikeStorage.add(it)
     }
@@ -60,7 +55,7 @@ class Blitzy {
         }.start()
 
         while (true) {
-            delay(clusteringInterval.toLong())
+            delay(Configuration.clusteringInterval)
 
             lightningStrikeStorage.prune()
 

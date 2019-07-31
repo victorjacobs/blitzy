@@ -4,11 +4,11 @@ import java.time.Clock
 import java.util.LinkedList
 import java.util.concurrent.PriorityBlockingQueue
 
-class LightningStrikeStorage {
+class LightningStrikeStorage(
+    private val lightningStrikeTtl: Int
+) {
 
     private val log = logger()
-
-    private val lightningStrikeTtl = 10 * 60 * 1000
 
     private val clock = Clock.systemUTC()
 

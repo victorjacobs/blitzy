@@ -34,11 +34,15 @@ class BlitzOrtungClient(
 
         while (true) {
             if (isClosed) {
+                log.info("Websocket closed")
+
                 reconnect()
 
                 while (!isOpen) {
                     delay(100)
                 }
+
+                log.info("Websocket reconnected")
             }
 
             delay(1000)

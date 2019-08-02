@@ -10,6 +10,10 @@ import de.lmu.ifi.dbs.elki.math.geodesy.SphericalHaversineEarthModel
 import org.slf4j.LoggerFactory
 
 fun cluster(data: Array<DoubleArray>): List<Cluster> {
+    if (data.isEmpty()) {
+        return listOf()
+    }
+
     val log = LoggerFactory.getLogger(::cluster.javaClass)
 
     val dbc = ArrayAdapterDatabaseConnection(data)

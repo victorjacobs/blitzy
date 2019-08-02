@@ -11,7 +11,7 @@ data class Coordinate(
             array[1]
         )
 
-        fun fromString(string: String) = Coordinate.fromArray(
+        fun fromString(string: String) = fromArray(
             string.split(",").map {
                 it.trim().toDouble()
             }.toDoubleArray()

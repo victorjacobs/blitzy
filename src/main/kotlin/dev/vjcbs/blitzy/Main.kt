@@ -33,6 +33,8 @@ class Main {
     private var geoJson: FeatureCollection = FeatureCollection.fromClusters(listOf())
 
     fun run() = runBlocking {
+        log.info("Configuration: {}", Configuration)
+
         launch {
             blitzOrtungClient.startAndKeepAlive()
         }

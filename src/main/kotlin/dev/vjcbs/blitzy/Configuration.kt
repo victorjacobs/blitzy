@@ -1,5 +1,8 @@
 package dev.vjcbs.blitzy
 
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.memberProperties
+
 object Configuration {
 
     // Top left and bottom right coordinates of the area monitored. Defaults to roughly Europe.
@@ -28,4 +31,11 @@ object Configuration {
 
     private fun getFromEnvOrThrow(varName: String) =
         getFromEnv(varName) ?: throw IllegalStateException("$varName not set")
+
+    override fun toString() =
+        this::class.memberProperties.filter {
+            it.visibility == KVisibility.PUBLIC
+        }.map {
+            Pair(it.name, it.getter.call(this))
+        }.joinToString(",")
 }

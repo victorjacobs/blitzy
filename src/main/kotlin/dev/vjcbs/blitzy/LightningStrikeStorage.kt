@@ -38,6 +38,6 @@ class LightningStrikeStorage(
             removedEntries++
         }
 
-        log.info("Removed $removedEntries entries from storage, currently storing ${size()} entries")
+        log.info("Removed $removedEntries elements from storage, currently storing ${size()} elements")
     }
 }

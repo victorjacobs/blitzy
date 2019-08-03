@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import java.net.URI
 import kotlinx.coroutines.delay
 import org.java_websocket.client.WebSocketClient
-import org.java_websocket.enums.ReadyState
 import org.java_websocket.handshake.ServerHandshake
+import java.net.URI
 
-class BlitzOrtungClient(
+class BlitzortungClient(
     private val topLeft: Coordinate,
     private val bottomRight: Coordinate,
     private val onLightningStrike: (LightningStrike) -> Unit
@@ -20,6 +19,8 @@ class BlitzOrtungClient(
 
     private val log = logger()
 
+    private var currentServer = 1
+
     private val objectMapper = ObjectMapper().apply {
         registerKotlinModule()
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
@@ -28,31 +29,35 @@ class BlitzOrtungClient(
     suspend fun startAndKeepAlive() {
         connect()
 
-        while (readyState == ReadyState.NOT_YET_CONNECTED) {
-            delay(100)
-        }
-
         while (true) {
-            if (isClosed) {
-                log.info("Websocket closed")
-
-                reconnect()
-
-                while (!isOpen) {
-                    delay(100)
-                }
-
-                log.info("Websocket reconnected")
-            }
-
             delay(1000)
+
+            if (isClosed) {
+                do {
+                    log.info("Reconnecting")
+
+                    uri = nextServerUri()
+                    reconnect()
+
+                    delay(5000)
+                } while (!isOpen)
+
+                log.info("Connected to ${serverUri()}")
+            }
         }
+    }
+
+    private fun serverUri() = URI("ws://ws$currentServer.blitzortung.org:8056/")
+
+    private fun nextServerUri(): URI {
+        currentServer = (currentServer % 5) + 1
+        return serverUri()
     }
 
     override fun onMessage(message: String?) {
         val lightningStrike = message?.let {
             try {
-                objectMapper.readValue<BlitzOrtungLightningStrike>(it)
+                objectMapper.readValue<BlitzortungLightningStrike>(it)
             } catch (e: Exception) {
                 log.error("Deserialization failed", e)
                 null
@@ -68,19 +73,17 @@ class BlitzOrtungClient(
     }
 
     override fun onOpen(handshakedata: ServerHandshake?) {
-        log.info("Opened websocket")
-
         send(
             "{\"west\":${topLeft.lon},\"east\":${bottomRight.lon}," +
                 "\"north\":${topLeft.lat},\"south\":${bottomRight.lat}}"
         )
     }
 
-    override fun onClose(code: Int, reason: String?, remote: Boolean) = log.info("Closed websocket")
+    override fun onClose(code: Int, reason: String?, remote: Boolean) = log.info("Closed web socket: $reason")
 
-    override fun onError(ex: Exception?) = log.error("Websocket error: $ex")
+    override fun onError(ex: Exception?) = log.error("Web socket error: $ex")
 
-    private data class BlitzOrtungLightningStrike(
+    private data class BlitzortungLightningStrike(
         val time: Long,
         val lat: Double,
         val lon: Double

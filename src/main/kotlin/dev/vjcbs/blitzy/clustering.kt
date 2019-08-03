@@ -29,7 +29,7 @@ fun cluster(data: Array<DoubleArray>): List<Cluster> {
         Configuration.clusteringMinPts
     ).run(db)
 
-    log.info("Clustering took {}ms", System.currentTimeMillis() - clusteringStartTimestamp)
+    log.info("Clustering took ${System.currentTimeMillis() - clusteringStartTimestamp}ms")
 
     return clusteringResult.allClusters.filter {
         !it.isNoise

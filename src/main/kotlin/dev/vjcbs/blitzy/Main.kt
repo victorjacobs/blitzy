@@ -21,7 +21,7 @@ class Main {
 
     private val lightningStrikeStorage = LightningStrikeStorage(Configuration.lightningStrikeTtl)
 
-    private val blitzOrtungClient = BlitzOrtungClient(
+    private val blitzortungClient = BlitzortungClient(
         Configuration.topLeftCoordinate,
         Configuration.bottomRightCoordinate
     ) {
@@ -33,10 +33,10 @@ class Main {
     private var geoJson: FeatureCollection = FeatureCollection.fromClusters(listOf())
 
     fun run() = runBlocking {
-        log.info("Configuration: {}", Configuration)
+        log.info("Configuration: $Configuration")
 
         launch {
-            blitzOrtungClient.startAndKeepAlive()
+            blitzortungClient.startAndKeepAlive()
         }
 
         embeddedServer(Netty, 8080) {
@@ -67,8 +67,7 @@ class Main {
             }
 
             log.info(
-                "Total number of clusters: {}, largest one: {}",
-                clusters.size, clusters.minBy { it.numberOfElements }
+                "Total number of clusters: ${clusters.size}, largest one: ${clusters.minBy { it.numberOfElements }}"
             )
         }
     }

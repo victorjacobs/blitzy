@@ -2,17 +2,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val coroutinesVersion = "1.3.0-RC"
 val logbackVersion = "1.2.3"
-val jacksonVersion = "2.9.9"
+val jacksonVersion = "2.11.1"
 val cliktVersion = "2.0.0"
-val javaWebsocketVersion = "1.4.0"
+val javaWebsocketVersion = "1.5.1"
 val elkiVersion = "0.7.5"
-val ktorVersion = "1.2.2"
+val ktorVersion = "1.3.1"
 
 plugins {
     application
     kotlin("jvm") version "1.3.31"
-    id("com.github.johnrengelman.shadow") version "5.0.0"
-    id("org.jlleitschuh.gradle.ktlint") version "8.0.0"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "9.3.0"
 }
 
 group = "dev.vjcbs"

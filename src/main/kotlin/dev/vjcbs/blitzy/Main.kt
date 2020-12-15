@@ -67,7 +67,7 @@ class Main {
             }
 
             log.info(
-                "Total number of clusters: ${clusters.size}, largest one: ${clusters.minBy { it.numberOfElements }}"
+                "Total number of clusters: ${clusters.size}, largest one: ${clusters.minByOrNull { it.numberOfElements }}"
             )
         }
     }

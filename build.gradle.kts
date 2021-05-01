@@ -2,17 +2,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val coroutinesVersion = "1.4.2"
 val logbackVersion = "1.2.3"
-val jacksonVersion = "2.12.0"
+val jacksonVersion = "2.12.3"
 val cliktVersion = "2.8.0"
-val javaWebsocketVersion = "1.5.1"
+val javaWebsocketVersion = "1.5.2"
 val elkiVersion = "0.7.5"
-val ktorVersion = "1.4.3"
+val ktorVersion = "1.5.4"
 
 plugins {
     application
-    kotlin("jvm") version "1.4.21"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
-    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
+    kotlin("jvm") version "1.5.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
 
 group = "dev.vjcbs"
@@ -24,7 +24,7 @@ repositories {
 }
 
 application {
-    mainClassName = "dev.vjcbs.blitzy.MainKt"
+    mainClass.set("dev.vjcbs.blitzy.MainKt")
 }
 
 dependencies {

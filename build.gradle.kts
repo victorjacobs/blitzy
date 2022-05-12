@@ -4,13 +4,14 @@ val coroutinesVersion = "1.4.2"
 val logbackVersion = "1.2.3"
 val jacksonVersion = "2.12.3"
 val cliktVersion = "2.8.0"
-val javaWebsocketVersion = "1.5.2"
+val javaWebsocketVersion = "1.5.3"
 val elkiVersion = "0.7.5"
 val ktorVersion = "1.5.4"
+val junitVersion = "5.8.2"
 
 plugins {
     application
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm") version "1.5.31"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
@@ -39,8 +40,18 @@ dependencies {
     implementation("de.lmu.ifi.dbs.elki:elki:$elkiVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
+
+    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-tasks.withType<KotlinCompile> {
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions.jvmTarget = "1.8"
 }

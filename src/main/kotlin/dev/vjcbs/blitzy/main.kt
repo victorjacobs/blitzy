@@ -1,6 +1,7 @@
 package dev.vjcbs.blitzy
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import dev.vjcbs.blitzy.blitzortung.BlitzortungClient
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.Compression

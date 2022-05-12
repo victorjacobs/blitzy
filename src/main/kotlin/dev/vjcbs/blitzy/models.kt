@@ -4,7 +4,6 @@ data class Coordinate(
     val lat: Double,
     val lon: Double
 ) {
-
     companion object {
         fun fromArray(array: DoubleArray) = Coordinate(
             array[0],

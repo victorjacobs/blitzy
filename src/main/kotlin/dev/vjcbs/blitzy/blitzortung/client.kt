@@ -1,9 +1,12 @@
-package dev.vjcbs.blitzy
+package dev.vjcbs.blitzy.blitzortung
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import dev.vjcbs.blitzy.Coordinate
+import dev.vjcbs.blitzy.LightningStrike
+import dev.vjcbs.blitzy.logger
 import kotlinx.coroutines.delay
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
@@ -14,12 +17,17 @@ class BlitzortungClient(
     private val bottomRight: Coordinate,
     private val onLightningStrike: (LightningStrike) -> Unit
 ) : WebSocketClient(
-    URI("ws://ws1.blitzortung.org:8056/")
+    URI("wss://ws1.blitzortung.org")
 ) {
+    private val endpoints = listOf(
+        "wss://ws1.blitzortung.org",
+        "wss://ws7.blitzortung.org",
+        "wss://ws8.blitzortung.org"
+    ).map { URI(it) }
 
     private val log = logger()
 
-    private var currentServer = 1
+    private var currentServerIndex = 1
 
     private val objectMapper = ObjectMapper().apply {
         registerKotlinModule()
@@ -36,28 +44,23 @@ class BlitzortungClient(
                 do {
                     log.info("Reconnecting")
 
-                    uri = nextServerUri()
+                    currentServerIndex = (currentServerIndex + 1 % endpoints.size)
+                    uri = endpoints[currentServerIndex]
+
                     reconnect()
 
                     delay(5000)
                 } while (!isOpen)
 
-                log.info("Connected to ${serverUri()}")
+                log.info("Connected to $uri")
             }
         }
-    }
-
-    private fun serverUri() = URI("ws://ws$currentServer.blitzortung.org:8056/")
-
-    private fun nextServerUri(): URI {
-        currentServer = (currentServer % 5) + 1
-        return serverUri()
     }
 
     override fun onMessage(message: String?) {
         val lightningStrike = message?.let {
             try {
-                objectMapper.readValue<BlitzortungLightningStrike>(it)
+                objectMapper.readValue<BlitzortungLightningStrike>(lzwDecompress(it))
             } catch (e: Exception) {
                 log.error("Deserialization failed", e)
                 null
@@ -68,29 +71,19 @@ class BlitzortungClient(
         }
 
         lightningStrike?.let {
+            if (it.lat > topLeft.lat || it.lat < bottomRight.lat || it.lon < topLeft.lon || it.lon > bottomRight.lon) {
+                return
+            }
+
             onLightningStrike(it.toLightningStrike())
         }
     }
 
     override fun onOpen(handshakedata: ServerHandshake?) {
-        send(
-            "{\"west\":${topLeft.lon},\"east\":${bottomRight.lon}," +
-                "\"north\":${topLeft.lat},\"south\":${bottomRight.lat}}"
-        )
+        send("{\"a\":542}")
     }
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) = log.info("Closed web socket: $reason")
 
     override fun onError(ex: Exception?) = log.error("Web socket error: $ex")
-
-    private data class BlitzortungLightningStrike(
-        val time: Long,
-        val lat: Double,
-        val lon: Double
-    ) {
-        fun toLightningStrike() = LightningStrike(
-            timestampNanos = time,
-            coordinate = Coordinate(lat, lon)
-        )
-    }
 }

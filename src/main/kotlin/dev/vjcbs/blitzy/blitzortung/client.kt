@@ -44,7 +44,7 @@ class BlitzortungClient(
                 do {
                     log.info("Reconnecting")
 
-                    currentServerIndex = (currentServerIndex + 1 % endpoints.size)
+                    currentServerIndex = (currentServerIndex + 1) % endpoints.size
                     uri = endpoints[currentServerIndex]
 
                     reconnect()

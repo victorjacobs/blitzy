@@ -2,16 +2,14 @@ package dev.vjcbs.blitzy
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import dev.vjcbs.blitzy.blitzortung.BlitzortungClient
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.Compression
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
-import io.ktor.response.respond
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -44,7 +42,7 @@ class Main {
             install(Compression)
             install(ContentNegotiation) {
                 jackson {
-                    registerModule(KotlinModule())
+                    registerModule(KotlinModule.Builder().build())
                 }
             }
 

@@ -1,19 +1,19 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val coroutinesVersion = "1.4.2"
-val logbackVersion = "1.2.3"
+val coroutinesVersion = "1.6.4"
+val logbackVersion = "1.4.5"
 val jacksonVersion = "2.12.3"
-val cliktVersion = "2.8.0"
+val cliktVersion = "3.5.0"
 val javaWebsocketVersion = "1.5.3"
 val elkiVersion = "0.7.5"
-val ktorVersion = "1.5.4"
-val junitVersion = "5.8.2"
+val ktorVersion = "2.2.1"
+val junitVersion = "5.9.1"
 
 plugins {
     application
-    kotlin("jvm") version "1.5.31"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    kotlin("jvm") version "1.8.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
 group = "dev.vjcbs"
@@ -39,7 +39,9 @@ dependencies {
     implementation("org.java-websocket:Java-WebSocket:$javaWebsocketVersion")
     implementation("de.lmu.ifi.dbs.elki:elki:$elkiVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-compression:$ktorVersion")
 
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")

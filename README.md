@@ -1,7 +1,5 @@
 # Blitzy
 
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/vjacobs/blitzy.svg)](https://hub.docker.com/r/vjacobs/blitzy)
-
 Connects to [blitzortung.org](http://blitzortung.org) API, clusters lighting strikes using *🌈data mining🌈* and exposes the clusters through a GeoJSON endpoint.
 
 ## Building

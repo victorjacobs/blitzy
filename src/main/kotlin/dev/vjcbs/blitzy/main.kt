@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class Main {
-
     private val log = logger()
 
     private val lightningStrikeStorage = LightningStrikeStorage(Configuration.lightningStrikeTtl)
@@ -49,6 +48,13 @@ class Main {
             routing {
                 get("/blitzortung.geojson") {
                     call.respond(geoJson)
+                }
+
+                get("/metrics") {
+                    call.respond(mapOf(
+                        "clusters" to clusters.size,
+                        "strikes" to lightningStrikeStorage.size()
+                    ))
                 }
             }
         }.start()

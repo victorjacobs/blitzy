@@ -7,7 +7,6 @@ import java.util.concurrent.PriorityBlockingQueue
 class LightningStrikeStorage(
     private val lightningStrikeTtl: Int
 ) {
-
     private val log = logger()
 
     private val clock = Clock.systemUTC()
@@ -33,7 +32,7 @@ class LightningStrikeStorage(
         val timeThresholdInNanos = (clock.millis() - lightningStrikeTtl) * 1_000_000
         var headOfQueue = lightningStrikes.peek()
 
-        while (headOfQueue?.timestampNanos ?: Long.MAX_VALUE < timeThresholdInNanos) {
+        while ((headOfQueue?.timestampNanos ?: Long.MAX_VALUE) < timeThresholdInNanos) {
             headOfQueue = lightningStrikes.poll()
             removedEntries++
         }

@@ -6,7 +6,6 @@ data class FeatureCollection(
     val features: List<Feature>,
     val metadata: FeatureCollectionMetadata
 ) {
-
     @Suppress("unused")
     val type
         get() = "FeatureCollection"
@@ -39,7 +38,6 @@ data class FeatureCollection(
 data class FeatureCollectionMetadata(
     val count: Int
 ) {
-
     @Suppress("unused")
     val title
         get() = "blitzortung.org thunderstorms"
@@ -50,7 +48,6 @@ data class Feature(
     val geometry: PointGeometry,
     val properties: FeatureProperties
 ) {
-
     @Suppress("unused")
     val type
         get() = "Feature"

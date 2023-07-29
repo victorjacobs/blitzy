@@ -1,4 +1,4 @@
-FROM gradle:jdk11 AS builder
+FROM gradle:jdk17 AS builder
 
 COPY . /src
 WORKDIR /src
@@ -7,7 +7,7 @@ RUN useradd -u 1107 blitzy
 RUN gradle shadowJar
 
 
-FROM openjdk:11-slim
+FROM openjdk:17-slim
 
 COPY --from=builder /src/build/libs/blitzy-1.0-SNAPSHOT-all.jar /app/blitzy.jar
 COPY --from=builder /etc/passwd /etc/passwd

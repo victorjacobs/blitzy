@@ -80,7 +80,7 @@ class BlitzortungClient(
     }
 
     override fun onOpen(handshakedata: ServerHandshake?) {
-        send("{\"a\":418}")
+        send("{\"a\":111}")
     }
 
     override fun onClose(code: Int, reason: String?, remote: Boolean) = log.info("Closed web socket: $reason")

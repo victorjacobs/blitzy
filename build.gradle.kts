@@ -20,6 +20,7 @@ group = "dev.vjcbs"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
     maven("https://jitpack.io")
 }

@@ -5,6 +5,7 @@ import dev.vjcbs.blitzy.blitzortung.BlitzortungClient
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.suppressCompression
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -51,6 +52,7 @@ class Main {
 
             routing {
                 get("/blitzortung.geojson") {
+                    call.suppressCompression()
                     call.respond(geoJson)
                 }
 

@@ -1,5 +1,5 @@
 {
-  description = "A flake for the Blitzy Gradle project";
+  description = "Lightning strike clustering service";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,20 +15,35 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        jdk = pkgs.jdk17;
+        pkgs = nixpkgs.legacyPackages.${system};
+        blitzy = pkgs.callPackage ./nix/package.nix { };
       in
       {
+        packages = {
+          inherit blitzy;
+          default = blitzy;
+        };
+
+        checks.default = blitzy;
+
         devShells.default = pkgs.mkShell {
           packages = [
-            jdk
-            pkgs.gradle
+            pkgs.jdk17
+            pkgs.gradle_8
           ];
 
           shellHook = ''
-            export JAVA_HOME=${jdk}
+            export JAVA_HOME=${pkgs.jdk17}
           '';
         };
+
+        formatter = pkgs.nixfmt-tree;
       }
-    );
+    )
+    // {
+      nixosModules = {
+        blitzy = import ./nix/module.nix;
+        default = self.nixosModules.blitzy;
+      };
+    };
 }

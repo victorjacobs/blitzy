@@ -8,6 +8,12 @@ Connects to [blitzortung.org](http://blitzortung.org) API, clusters lighting str
 ./gradlew shadowJar
 ```
 
+With Nix:
+
+```bash
+nix build
+```
+
 ## Running
 
 ```bash
@@ -15,6 +21,31 @@ docker run -p 8080:8080 vjacobs/blitzy
 ```
 
 The GeoJSON file is now available at [localhost:8080/blitzortung.geojson](http://localhost:8080/blitzortung.geojson).
+
+### NixOS
+
+Add the flake module to your NixOS configuration and enable the service:
+
+```nix
+{
+  inputs.blitzy.url = "github:victorjacobs/blitzy";
+
+  outputs = { nixpkgs, blitzy, ... }: {
+    nixosConfigurations.my-host = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        blitzy.nixosModules.default
+        {
+          services.blitzy = {
+            enable = true;
+            openFirewall = true;
+          };
+        }
+      ];
+    };
+  };
+}
+```
 
 ### Configuration
 

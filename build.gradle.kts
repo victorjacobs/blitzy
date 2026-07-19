@@ -1,19 +1,18 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val coroutinesVersion = "1.6.4"
-val logbackVersion = "1.4.5"
-val jacksonVersion = "2.14.2"
-val cliktVersion = "2.8.0"
-val javaWebsocketVersion = "1.5.3"
-val elkiVersion = "0.7.5"
-val ktorVersion = "2.3.2"
-val junitVersion = "5.9.1"
+val coroutinesVersion = "1.11.0"
+val logbackVersion = "1.5.38"
+val jacksonVersion = "2.22.1"
+val javaWebsocketVersion = "1.6.0"
+val elkiVersion = "0.8.0"
+val ktorVersion = "3.5.1"
+val junitVersion = "6.1.2"
 
 plugins {
     application
-    kotlin("jvm") version "1.9.0"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    kotlin("jvm") version "2.4.10"
+    id("com.gradleup.shadow") version "9.6.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
 group = "dev.vjcbs"
@@ -22,7 +21,6 @@ version = "1.0-SNAPSHOT"
 repositories {
     gradlePluginPortal()
     mavenCentral()
-    maven("https://jitpack.io")
 }
 
 application {
@@ -36,9 +34,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.github.ajalt:clikt:$cliktVersion")
     implementation("org.java-websocket:Java-WebSocket:$javaWebsocketVersion")
-    implementation("de.lmu.ifi.dbs.elki:elki:$elkiVersion")
+    implementation("io.github.elki-project:elki:$elkiVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
@@ -46,6 +43,7 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
@@ -55,6 +53,16 @@ tasks.test {
     }
 }
 
+ktlint {
+    version.set("1.8.0")
+}
+
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions.jvmTarget = "17"
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+}
+
+tasks.shadowJar {
+    filesMatching("META-INF/*.kotlin_module") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }

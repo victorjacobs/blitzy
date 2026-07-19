@@ -1,7 +1,7 @@
 {
   lib,
   stdenv,
-  gradle_8,
+  gradle_9,
   jdk17_headless,
   makeWrapper,
 }:
@@ -13,22 +13,21 @@ stdenv.mkDerivation (finalAttrs: {
   src = lib.fileset.toSource {
     root = ./..;
     fileset = lib.fileset.unions [
+      (lib.fileset.maybeMissing ../.editorconfig)
       ../build.gradle.kts
-      ../gradle
       ../gradle.properties
-      ../gradlew
       ../settings.gradle
       ../src
     ];
   };
 
-  mitmCache = gradle_8.fetchDeps {
+  mitmCache = gradle_9.fetchDeps {
     pkg = finalAttrs.finalPackage;
     data = ./deps.json;
   };
 
   nativeBuildInputs = [
-    gradle_8
+    gradle_9
     makeWrapper
   ];
 

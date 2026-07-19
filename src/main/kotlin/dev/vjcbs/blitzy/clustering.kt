@@ -1,12 +1,12 @@
 package dev.vjcbs.blitzy
 
-import de.lmu.ifi.dbs.elki.algorithm.clustering.DBSCAN
-import de.lmu.ifi.dbs.elki.data.DoubleVector
-import de.lmu.ifi.dbs.elki.data.type.TypeUtil
-import de.lmu.ifi.dbs.elki.database.StaticArrayDatabase
-import de.lmu.ifi.dbs.elki.datasource.ArrayAdapterDatabaseConnection
-import de.lmu.ifi.dbs.elki.distance.distancefunction.geo.LatLngDistanceFunction
-import de.lmu.ifi.dbs.elki.math.geodesy.SphericalHaversineEarthModel
+import elki.clustering.dbscan.DBSCAN
+import elki.data.NumberVector
+import elki.data.type.TypeUtil
+import elki.database.StaticArrayDatabase
+import elki.datasource.ArrayAdapterDatabaseConnection
+import elki.distance.geo.LatLngDistance
+import elki.math.geodesy.SphericalHaversineEarthModel
 import org.slf4j.LoggerFactory
 
 fun cluster(data: Array<DoubleArray>): List<Cluster> {
@@ -19,15 +19,15 @@ fun cluster(data: Array<DoubleArray>): List<Cluster> {
     val dbc = ArrayAdapterDatabaseConnection(data)
     val db = StaticArrayDatabase(dbc, null)
     db.initialize()
-    val relation = db.getRelation<DoubleVector>(TypeUtil.DOUBLE_VECTOR_FIELD)
+    val relation = db.getRelation<NumberVector>(TypeUtil.NUMBER_VECTOR_FIELD)
 
     val clusteringStartTimestamp = System.currentTimeMillis()
 
     val clusteringResult = DBSCAN(
-        LatLngDistanceFunction(SphericalHaversineEarthModel.STATIC),
+        LatLngDistance(SphericalHaversineEarthModel.STATIC),
         Configuration.clusteringEps,
         Configuration.clusteringMinPts
-    ).run(db)
+    ).run(relation)
 
     log.info("Clustering took ${System.currentTimeMillis() - clusteringStartTimestamp}ms")
 
@@ -37,7 +37,7 @@ fun cluster(data: Array<DoubleArray>): List<Cluster> {
         var average = Coordinate(0.0, 0.0)
 
         cluster.iDs.forEach { id ->
-            val point = (relation.get(id) as DoubleVector).toArray()
+            val point = relation.get(id).toArray()
 
             average += Coordinate.fromArray(point)
         }

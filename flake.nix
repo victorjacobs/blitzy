@@ -29,7 +29,7 @@
         devShells.default = pkgs.mkShell {
           packages = [
             pkgs.jdk17
-            pkgs.gradle_8
+            pkgs.gradle_9
           ];
 
           shellHook = ''

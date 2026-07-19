@@ -38,6 +38,8 @@ Add the flake module to your NixOS configuration and enable the service:
         {
           services.blitzy = {
             enable = true;
+            listenAddress = "0.0.0.0";
+            listenPort = 8080;
             openFirewall = true;
           };
         }
@@ -51,6 +53,8 @@ Add the flake module to your NixOS configuration and enable the service:
 
 Configuration is done through the following environment variables:
 
+* `LISTEN_ADDRESS` Address on which the HTTP server listens. Defaults to `0.0.0.0`.
+* `LISTEN_PORT` Port on which the HTTP server listens. Defaults to `8080`.
 * `TOP_LEFT_COORDINATE` and `BOTTOM_RIGHT_COORDINATE`: Top left and bottom right coordinates of the area monitored. Defaults to roughly Europe. Format of both variables is `lat,lon`. E.g. `63.14,-18.11`.
 * `CLUSTERING_INTERVAL` Time between clustering runs in milliseconds, defaults to 1 minute.
 * `LIGHTNING_STRIKE_TTL` TTL (milliseconds) for lightning strikes, how long are they kept in memory. Defaults to 10 minutes.

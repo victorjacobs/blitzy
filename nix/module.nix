@@ -25,6 +25,18 @@ in
       description = "Whether to open the service port in the firewall.";
     };
 
+    listenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "0.0.0.0";
+      description = "Address on which Blitzy listens.";
+    };
+
+    listenPort = lib.mkOption {
+      type = lib.types.port;
+      default = 8080;
+      description = "Port on which Blitzy listens.";
+    };
+
     settings = {
       topLeftCoordinate = lib.mkOption {
         type = lib.types.str;
@@ -65,7 +77,7 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall [ 8080 ];
+    networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall [ cfg.listenPort ];
 
     systemd.services.blitzy = {
       description = "Blitzy lightning strike clustering service";
@@ -74,6 +86,8 @@ in
       after = [ "network-online.target" ];
 
       environment = {
+        LISTEN_ADDRESS = cfg.listenAddress;
+        LISTEN_PORT = toString cfg.listenPort;
         TOP_LEFT_COORDINATE = cfg.settings.topLeftCoordinate;
         BOTTOM_RIGHT_COORDINATE = cfg.settings.bottomRightCoordinate;
         CLUSTERING_INTERVAL = toString cfg.settings.clusteringInterval;

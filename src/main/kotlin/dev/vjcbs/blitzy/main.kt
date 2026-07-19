@@ -37,7 +37,11 @@ class Main {
             blitzortungClient.startAndKeepAlive()
         }
 
-        embeddedServer(Netty, 8080) {
+        embeddedServer(
+            Netty,
+            port = Configuration.listenPort,
+            host = Configuration.listenAddress
+        ) {
             install(Compression)
             install(ContentNegotiation) {
                 jackson {

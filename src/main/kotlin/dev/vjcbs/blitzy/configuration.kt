@@ -4,6 +4,10 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.memberProperties
 
 object Configuration {
+    val listenAddress = getFromEnv("LISTEN_ADDRESS") ?: "0.0.0.0"
+
+    val listenPort = getFromEnv("LISTEN_PORT")?.toInt() ?: 8080
+
     // Top left and bottom right coordinates of the area monitored. Defaults to roughly Europe.
     val topLeftCoordinate = getFromEnv("TOP_LEFT_COORDINATE")?.let {
         Coordinate.fromString(it)

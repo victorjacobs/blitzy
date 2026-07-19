@@ -85,6 +85,7 @@ in
       serviceConfig = {
         DynamicUser = true;
         ExecStart = lib.getExe cfg.package;
+        MemoryMax = "512M";
         Restart = "on-failure";
 
         CapabilityBoundingSet = "";

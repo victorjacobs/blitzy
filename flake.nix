@@ -42,7 +42,13 @@
     )
     // {
       nixosModules = {
-        blitzy = import ./nix/module.nix;
+        blitzy =
+          { lib, pkgs, ... }:
+          {
+            imports = [ ./nix/module.nix ];
+
+            services.blitzy.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.blitzy;
+          };
         default = self.nixosModules.blitzy;
       };
     };

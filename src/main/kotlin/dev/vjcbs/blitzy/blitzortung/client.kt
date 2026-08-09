@@ -12,9 +12,32 @@ import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.net.URI
 
+enum class DiscardReason(val tagValue: String) {
+    EMPTY_MESSAGE("empty_message"),
+    INVALID_MESSAGE("invalid_message"),
+    OUTSIDE_MONITORED_AREA("outside_monitored_area")
+}
+
+interface BlitzortungClientObserver {
+    fun messageReceived() {}
+
+    fun messageDiscarded(reason: DiscardReason) {}
+
+    fun lightningStrikeStored() {}
+
+    fun connectionChanged(connected: Boolean) {}
+
+    fun reconnectionAttempted() {}
+
+    fun websocketError() {}
+}
+
+private object NoOpBlitzortungClientObserver : BlitzortungClientObserver
+
 class BlitzortungClient(
     private val topLeft: Coordinate,
     private val bottomRight: Coordinate,
+    private val observer: BlitzortungClientObserver = NoOpBlitzortungClientObserver,
     private val onLightningStrike: (LightningStrike) -> Unit
 ) : WebSocketClient(
     URI("wss://ws1.blitzortung.org")
@@ -43,6 +66,7 @@ class BlitzortungClient(
             if (isClosed) {
                 do {
                     log.info("Reconnecting")
+                    observer.reconnectionAttempted()
 
                     currentServerIndex = (currentServerIndex + 1) % endpoints.size
                     uri = endpoints[currentServerIndex]
@@ -58,32 +82,48 @@ class BlitzortungClient(
     }
 
     override fun onMessage(message: String?) {
-        val lightningStrike = message?.let {
-            try {
-                objectMapper.readValue<BlitzortungLightningStrike>(lzwDecompress(it))
-            } catch (e: Exception) {
-                log.error("Deserialization failed", e)
-                null
-            }
-        } ?: run {
+        observer.messageReceived()
+
+        if (message == null) {
             log.error("Empty message received")
-            null
+            observer.messageDiscarded(DiscardReason.EMPTY_MESSAGE)
+
+            return
         }
 
-        lightningStrike?.let {
-            if (it.lat > topLeft.lat || it.lat < bottomRight.lat || it.lon < topLeft.lon || it.lon > bottomRight.lon) {
-                return
-            }
+        val lightningStrike = try {
+            objectMapper.readValue<BlitzortungLightningStrike>(lzwDecompress(message))
+        } catch (e: Exception) {
+            log.error("Deserialization failed", e)
+            observer.messageDiscarded(DiscardReason.INVALID_MESSAGE)
 
-            onLightningStrike(it.toLightningStrike())
+            return
         }
+
+        if (
+            lightningStrike.lat > topLeft.lat || lightningStrike.lat < bottomRight.lat ||
+            lightningStrike.lon < topLeft.lon || lightningStrike.lon > bottomRight.lon
+        ) {
+            observer.messageDiscarded(DiscardReason.OUTSIDE_MONITORED_AREA)
+            return
+        }
+
+        onLightningStrike(lightningStrike.toLightningStrike())
+        observer.lightningStrikeStored()
     }
 
     override fun onOpen(handshakedata: ServerHandshake?) {
+        observer.connectionChanged(true)
         send("{\"a\":111}")
     }
 
-    override fun onClose(code: Int, reason: String?, remote: Boolean) = log.info("Closed web socket: $reason")
+    override fun onClose(code: Int, reason: String?, remote: Boolean) {
+        observer.connectionChanged(false)
+        log.info("Closed web socket: $reason")
+    }
 
-    override fun onError(ex: Exception?) = log.error("Web socket error: $ex")
+    override fun onError(ex: Exception?) {
+        observer.websocketError()
+        log.error("Web socket error: $ex")
+    }
 }

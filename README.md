@@ -22,6 +22,15 @@ docker run -p 8080:8080 vjacobs/blitzy
 
 The GeoJSON file is now available at [localhost:8080/blitzortung.geojson](http://localhost:8080/blitzortung.geojson).
 
+Prometheus metrics are exposed at [localhost:8080/metrics](http://localhost:8080/metrics). They include current and total lightning strike counts, tracked cluster counts and sizes, clustering duration and failures, discarded messages, and WebSocket health. A minimal scrape configuration is:
+
+```yaml
+scrape_configs:
+  - job_name: blitzy
+    static_configs:
+      - targets: [localhost:8080]
+```
+
 ### NixOS
 
 Add the flake module to your NixOS configuration and enable the service:

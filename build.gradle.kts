@@ -6,6 +6,7 @@ val jacksonVersion = "2.22.1"
 val javaWebsocketVersion = "1.6.0"
 val elkiVersion = "0.8.0"
 val ktorVersion = "3.5.1"
+val micrometerVersion = "1.16.5"
 val junitVersion = "6.1.2"
 
 plugins {
@@ -40,9 +41,12 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-compression:$ktorVersion")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerVersion")
 
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

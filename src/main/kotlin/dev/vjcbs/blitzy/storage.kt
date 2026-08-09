@@ -5,11 +5,10 @@ import java.util.LinkedList
 import java.util.concurrent.PriorityBlockingQueue
 
 class LightningStrikeStorage(
-    private val lightningStrikeTtl: Int
+    private val lightningStrikeTtl: Int,
+    private val clock: Clock = Clock.systemUTC()
 ) {
     private val log = logger()
-
-    private val clock = Clock.systemUTC()
 
     private val lightningStrikes = PriorityBlockingQueue<LightningStrike>(11) { a, b ->
         (a.timestampNanos - b.timestampNanos).compareTo(0)
@@ -27,16 +26,17 @@ class LightningStrikeStorage(
 
     fun timestampOldestLightningStrike() = lightningStrikes.peek()?.timestampNanos
 
-    fun prune() {
+    fun prune(): Int {
         var removedEntries = 0
         val timeThresholdInNanos = (clock.millis() - lightningStrikeTtl) * 1_000_000
-        var headOfQueue = lightningStrikes.peek()
 
-        while ((headOfQueue?.timestampNanos ?: Long.MAX_VALUE) < timeThresholdInNanos) {
-            headOfQueue = lightningStrikes.poll()
+        while ((lightningStrikes.peek()?.timestampNanos ?: Long.MAX_VALUE) < timeThresholdInNanos) {
+            lightningStrikes.poll()
             removedEntries++
         }
 
         log.info("Removed $removedEntries elements from storage, currently storing ${size()} elements")
+
+        return removedEntries
     }
 }

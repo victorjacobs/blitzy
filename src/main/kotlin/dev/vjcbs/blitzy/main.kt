@@ -6,11 +6,14 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.suppressCompression
+import io.ktor.server.metrics.micrometer.MicrometerMetrics
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -20,13 +23,6 @@ class Main {
 
     private val lightningStrikeStorage = LightningStrikeStorage(Configuration.lightningStrikeTtl)
 
-    private val blitzortungClient = BlitzortungClient(
-        Configuration.topLeftCoordinate,
-        Configuration.bottomRightCoordinate
-    ) {
-        lightningStrikeStorage.add(it)
-    }
-
     private var clusters: List<Cluster> = listOf()
 
     private var geoJson: FeatureCollection = FeatureCollection.fromClusters(listOf())
@@ -34,16 +30,19 @@ class Main {
     fun run() = runBlocking {
         log.info("Configuration: $Configuration")
 
-        launch {
-            blitzortungClient.startAndKeepAlive()
-        }
+        val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+        lateinit var metrics: BlitzyMetrics
 
-        embeddedServer(
+        val server = embeddedServer(
             Netty,
             port = Configuration.listenPort,
             host = Configuration.listenAddress
         ) {
             install(Compression)
+            install(MicrometerMetrics) {
+                this.registry = registry
+            }
+            metrics = BlitzyMetrics(lightningStrikeStorage, registry)
             install(ContentNegotiation) {
                 jackson {
                     registerModule(KotlinModule.Builder().build())
@@ -56,24 +55,36 @@ class Main {
                     call.respond(geoJson)
                 }
 
-                get("/metrics") {
-                    call.respond(mapOf(
-                        "clusters" to clusters.size,
-                        "strikes" to lightningStrikeStorage.size()
-                    ))
-                }
+                metricsEndpoint(metrics)
             }
-        }.start()
+        }
+
+        server.start()
+
+        val blitzortungClient = BlitzortungClient(
+            Configuration.topLeftCoordinate,
+            Configuration.bottomRightCoordinate,
+            metrics
+        ) {
+            lightningStrikeStorage.add(it)
+        }
+
+        launch {
+            blitzortungClient.startAndKeepAlive()
+        }
 
         while (true) {
             delay(Configuration.clusteringInterval)
 
-            lightningStrikeStorage.prune()
+            metrics.lightningStrikesPruned(lightningStrikeStorage.prune())
 
+            val clusteringStartNanos = System.nanoTime()
             try {
                 clusters = cluster(lightningStrikeStorage.asArray())
                 geoJson = FeatureCollection.fromClusters(clusters)
+                metrics.clusteringSucceeded(clusters, System.nanoTime() - clusteringStartNanos)
             } catch (e: Exception) {
+                metrics.clusteringFailed(System.nanoTime() - clusteringStartNanos)
                 log.error("Clustering failed", e)
             }
 
